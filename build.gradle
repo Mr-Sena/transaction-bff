@@ -23,7 +23,6 @@ repositories {
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-actuator'
-	implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
@@ -36,6 +35,11 @@ dependencies {
 
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.8'
+
+	//Redis:
+	//implementation 'org.springframework.boot:spring-boot-starter-data-redis-reactive'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+	implementation 'org.springframework.data:spring-data-redis'
 
 
 }
