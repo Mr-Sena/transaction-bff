@@ -5,6 +5,7 @@ import org.springframework.web.reactive.config.WebFluxConfigurer;
 
 public class WebFluxConfig implements WebFluxConfigurer {
 
+    //Todo: Comentar essa classe para verificar a necessidade.
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
 

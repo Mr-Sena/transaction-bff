@@ -7,6 +7,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.redis.core.RedisHash;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.math.BigDecimal;
@@ -16,8 +18,10 @@ import java.util.UUID;
 @Getter
 @Setter
 @EqualsAndHashCode(of = "uuid")
+@RedisHash(value = "TransactionDto", timeToLive = 300) // Persistir os dados somente durante 5 minutos (300 segundos).
 public class TransactionDto {
 
+    @Id
     @Schema(description = "Propriedade para identificar o código da transação.")
     private UUID uuid;
 
