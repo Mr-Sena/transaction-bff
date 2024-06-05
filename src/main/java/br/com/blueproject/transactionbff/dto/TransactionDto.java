@@ -2,8 +2,14 @@ package br.com.blueproject.transactionbff.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import io.swagger.v3.oas.annotations.media.Schema;
-import jakarta.validation.Valid;
-import jakarta.validation.constraints.NotNull;
+
+//Replace by the oldest Spring boot release [DOWNGRADE]:
+//import jakarta.validation.Valid;
+import javax.validation.Valid;
+
+//import jakarta.validation.constraints.NotNull;
+import javax.validation.constraints.NotNull;
+
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;

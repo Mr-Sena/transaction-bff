@@ -1,10 +1,16 @@
 version: "2"
 
+volumes:
+  redis-for-spring:
+
+
 services:
   redis:
     image: redis
     ports:
       - "6379:6379"
+    volumes:
+      - redis-for-spring:/data
 
 ## Ferramenta para gerenciamento de banco de dados.
   redis-commandr-interface:
