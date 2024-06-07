@@ -3,6 +3,7 @@ package br.com.blueproject.transactionbff.api;
 import br.com.blueproject.transactionbff.domain.TransactionService;
 import br.com.blueproject.transactionbff.dto.RequestTransactionDto;
 import br.com.blueproject.transactionbff.dto.TransactionDto;
+import br.com.blueproject.transactionbff.tratamentodesvio.NotFoundException;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.Parameters;
@@ -10,10 +11,8 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import reactor.core.publisher.Mono;
 
 import java.util.Optional;
@@ -46,7 +45,7 @@ public class TransactionController {
 
         }
 
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Unable to find resource.");
+        throw new NotFoundException("Unable to find resource.");
     }
 
 
@@ -68,7 +67,7 @@ public class TransactionController {
             return Mono.just(transactionDto.get());
         }
 
-        throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Não foi possível localizar o recurso.");
+        throw new NotFoundException("Não foi possível localizar o recurso.");
     }
 
 
