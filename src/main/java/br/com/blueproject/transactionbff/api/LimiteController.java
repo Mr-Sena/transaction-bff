@@ -1,7 +1,7 @@
 package br.com.blueproject.transactionbff.api;
 
+import br.com.blueproject.transactionbff.domain.LimiteService;
 import br.com.blueproject.transactionbff.dto.LimiteDiarioDto;
-import br.com.blueproject.transactionbff.feign.LimiteClientHttp;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -11,16 +11,16 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/limites")
 public class LimiteController {
 
-    private LimiteClientHttp limiteClient;
+    private LimiteService service;
 
-    public LimiteController(LimiteClientHttp limiteClient) {
-        this.limiteClient = limiteClient;
+    public LimiteController(LimiteService service) {
+        this.service = service;
     }
 
     @GetMapping( value = "/{agencia}/{conta}" )
     public LimiteDiarioDto buscarLimiteDiario(@PathVariable("agencia") final Long agencia, @PathVariable("conta") final Long conta) {
 
-        return limiteClient.buscarLimiteDiario(agencia, conta);
+        return service.buscarLimiteDiario(agencia, conta);
 
     }
 }

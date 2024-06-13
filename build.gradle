@@ -36,19 +36,25 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'io.projectreactor:reactor-test'
 
-	//Sprindoc:
-	//Replace [implementation group: 'org.springdoc', name: 'springdoc-openapi-webflux-ui', version: '1.6.3'], by:
-	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webflux-ui', version: '2.2.0'
-
-	//todo: Remove this dependency(?)
-	implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
-
+	//Springdoc:
+	implementation group: 'org.springdoc', name: 'springdoc-openapi-webflux-ui', version: '1.6.3'
+	//implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webflux-ui', version: '2.2.0'
+	//implementation group: 'org.springdoc', name: 'springdoc-openapi-starter-webmvc-ui', version: '2.2.0'
+	//todo: Remove this dependencies(?)
+	
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation group: 'com.fasterxml.jackson.datatype', name: 'jackson-datatype-jsr310', version: '2.9.8'
 
 	//Redis:
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.springframework.data:spring-data-redis'
+
+
+	//Circuit Breaker dependency - resilience4j [circuit-breaker, core, resilience4j-all]
+	implementation 'io.github.resilience4j:resilience4j-circuitbreaker:1.7.1'
+	implementation 'io.github.resilience4j:resilience4j-core:1.7.1'
+	implementation 'io.github.resilience4j:resilience4j-all:1.7.1'
+
 
 
 }
