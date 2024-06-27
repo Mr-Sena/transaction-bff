@@ -4,7 +4,9 @@ import br.com.blueproject.transactionbff.dto.RequestTransactionDto;
 import br.com.blueproject.transactionbff.dto.TransactionDto;
 import br.com.blueproject.transactionbff.redis.TransactionRedisRepository;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.QueryTimeoutException;
+import org.springframework.kafka.core.reactive.ReactiveKafkaProducerTemplate;
 import org.springframework.retry.annotation.Backoff;
 import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.support.RetryTemplate;
@@ -20,20 +22,29 @@ public class TransactionService {
 
     private TransactionRedisRepository repository;
     private RetryTemplate retryTemplate;
+    private ReactiveKafkaProducerTemplate<String, RequestTransactionDto> kafkaProducerTemplate;
 
-    public TransactionService(TransactionRedisRepository repository, RetryTemplate retryTemplate) {
+    @Value("${app.topic}")
+    private String topicName;
+
+
+    public TransactionService(TransactionRedisRepository repository, RetryTemplate retryTemplate, ReactiveKafkaProducerTemplate<String, RequestTransactionDto> kafkaProducerTemplate) {
         this.repository = repository;
         this.retryTemplate = retryTemplate;
+        this.kafkaProducerTemplate = kafkaProducerTemplate;
     }
 
-
-    @Transactional
-    @Retryable( value = QueryTimeoutException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
     // The 'value' argument is the problem failure that trigger the retry sequence.
-    public Optional<TransactionDto> save (final RequestTransactionDto requestDto) {
+    @Retryable( value = QueryTimeoutException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
+    // QueryTimeoutException -> When lost redis database connection.
+    @Transactional
+    public Optional<TransactionDto> save (final RequestTransactionDto dadosDeTransferencia) {
+        dadosDeTransferencia.setData(LocalDateTime.now());
 
-        requestDto.setData(LocalDateTime.now());
-        return Optional.of(repository.save(requestDto));
+        kafkaProducerTemplate.send(topicName, dadosDeTransferencia)
+                .doOnSuccess(theResult -> log.info("Sucesso ao publicar a mensagem. \n{}", theResult.toString())).subscribe();
+
+        return Optional.of(repository.save(dadosDeTransferencia));
     }
 
 
