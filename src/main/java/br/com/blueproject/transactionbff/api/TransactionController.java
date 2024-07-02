@@ -39,9 +39,9 @@ public class TransactionController {
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
     public Mono<TransactionDto> enviarTransacao(@RequestBody final RequestTransactionDto requestTransactionDto) {
 
-        final Optional<TransactionDto> requestDto = service.save(requestTransactionDto);
+        final Optional requestDto = service.save(requestTransactionDto);
         if (requestDto.isPresent()) {
-            return Mono.just(requestDto.get());
+            return Mono.just( (TransactionDto) requestDto.get());
 
         }
 

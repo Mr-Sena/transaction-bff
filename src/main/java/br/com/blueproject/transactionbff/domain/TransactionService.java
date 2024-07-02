@@ -13,6 +13,7 @@ import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -41,10 +42,11 @@ public class TransactionService {
     public Optional<TransactionDto> save (final RequestTransactionDto dadosDeTransferencia) {
         dadosDeTransferencia.setData(LocalDateTime.now());
 
+        Optional persistence = Optional.of(repository.save(dadosDeTransferencia));
         kafkaProducerTemplate.send(topicName, dadosDeTransferencia)
-                .doOnSuccess(theResult -> log.info("Sucesso ao publicar a mensagem. \n{}", theResult.toString())).subscribe();
+                .doOnSuccess(theResult -> log.info("Sucesso ao publicar a mensagem. {}", theResult.toString())).subscribe();
 
-        return Optional.of(repository.save(dadosDeTransferencia));
+        return persistence;
     }
 
 
