@@ -9,6 +9,7 @@ public enum SituacaoEnum {
     NAO_ANALISADA,
     EM_ANALISE_HUMANA,
     EM_SUSPEITA_FRAUDE,
-    RISCO_CONFIRMADO
+    RISCO_CONFIRMADO,
+    APROVADA
 
 }

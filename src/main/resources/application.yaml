@@ -30,6 +30,10 @@ server:
 limites:
   url: http://localhost:8086
 
+transaction:
+  url: http://localhost:8080
+
+
 
 
 springdoc:

@@ -12,9 +12,13 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.http.MediaType;
+import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+import java.util.List;
 import java.util.Optional;
 
 @RestController
@@ -42,6 +46,31 @@ public class TransactionController {
         return service.save(requestTransactionDto);
     }
 
+
+    @GetMapping( value = "/{agencia}/{conta}" )
+    public Flux<List<TransactionDto>> buscarTransferencias(@PathVariable("agencia") final Long agencia, @PathVariable("conta") final Long conta) {
+
+        var data = service.findContaStream(agencia, conta);
+        return data;
+
+    }
+
+
+    @GetMapping( value = "/sse/{agencia}/{conta}" )
+    public Flux<ServerSentEvent<List<TransactionDto>>> buscarTransferenciasSSE(@PathVariable("agencia") final Long agencia, @PathVariable("conta") final Long conta) {
+
+        return Flux.interval(Duration.ofSeconds(2)).map( // O valor do intervalo determina um novo mapeamento de eventos após esse tempo específicado.
+                sequence -> ServerSentEvent.<List<TransactionDto>>builder()
+                        .id(String.valueOf(sequence))
+                        .event("transacoes")
+                        .data(queryResult(agencia, conta))
+                        .retry(Duration.ofSeconds(1)) // Em caso de falha, repetir a nova tentativa após 1 segundo.
+                        .build());
+    }
+
+    private List<TransactionDto> queryResult(Long agencia, Long conta) {
+        return service.findByAgenciaAndConta(agencia, conta);
+    }
 
 
     @Operation(description = "API para buscar as trasações persistidas por id.")

@@ -2,6 +2,7 @@ package br.com.blueproject.transactionbff.domain;
 
 import br.com.blueproject.transactionbff.dto.RequestTransactionDto;
 import br.com.blueproject.transactionbff.dto.TransactionDto;
+import br.com.blueproject.transactionbff.feign.TransactionClientHttp;
 import br.com.blueproject.transactionbff.redis.TransactionRedisRepository;
 import br.com.blueproject.transactionbff.tratamentodesvio.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
@@ -13,28 +14,35 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.SignalType;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 @Service
 @Slf4j
 public class TransactionService {
 
-    private TransactionRedisRepository repository;
-    private RetryTemplate retryTemplate;
-    private ReactiveKafkaProducerTemplate<String, RequestTransactionDto> kafkaProducerTemplate;
+    private final TransactionRedisRepository repository;
+    private final RetryTemplate retryTemplate;
+    private final ReactiveKafkaProducerTemplate<String, RequestTransactionDto> kafkaProducerTemplate;
+    private final TransactionClientHttp httpClient;
 
     @Value("${app.topic}")
     private String topicName;
 
 
-    public TransactionService(TransactionRedisRepository repository, RetryTemplate retryTemplate, ReactiveKafkaProducerTemplate<String, RequestTransactionDto> kafkaProducerTemplate) {
+    public TransactionService(TransactionRedisRepository repository, RetryTemplate retryTemplate, ReactiveKafkaProducerTemplate<String,
+            RequestTransactionDto> kafkaProducerTemplate, TransactionClientHttp httpClient) {
+
         this.repository = repository;
         this.retryTemplate = retryTemplate;
         this.kafkaProducerTemplate = kafkaProducerTemplate;
+        this.httpClient = httpClient;
     }
 
     // The 'value' argument is the problem failure that trigger the retry sequence.
@@ -71,6 +79,21 @@ public class TransactionService {
         });
     }
 
+
+
+    public Flux<List<TransactionDto>> findContaStream(final Long agencia, final Long conta) {
+
+        List<TransactionDto> queryResult = findByAgenciaAndConta(agencia, conta);
+        return Flux.fromIterable(queryResult).cache(Duration.ofSeconds(2)) // Persistência de memória em cache durante 2 segundos.
+                .limitRate(200).defaultIfEmpty(new TransactionDto()) // LimitRate is the items amount for this list.
+                .buffer(200);
+    }
+
+
+    public List<TransactionDto> findByAgenciaAndConta(final Long agencia, final Long conta) {
+
+        return httpClient.buscarTransferencias(agencia, conta);
+    }
 
     public Optional<TransactionDto> findById (String uuid) {
 
