@@ -5,14 +5,17 @@ import br.com.blueproject.transactionbff.feign.LimiteClientHttp;
 import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import io.github.resilience4j.circuitbreaker.CircuitBreaker;
 import io.github.resilience4j.decorators.Decorators;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Mono;
 
 import java.math.BigDecimal;
 import java.util.Arrays;
 import java.util.function.Supplier;
 
 @Service
+@Slf4j
 public class LimiteService {
 
     LimiteClientHttp httpClient;
@@ -24,28 +27,21 @@ public class LimiteService {
         this.httpClient = httpClient;
     }
 
-    public LimiteDiarioDto buscarLimiteDiario(final Long agencia, final Long conta) {
+    public Mono<LimiteDiarioDto> buscarLimiteDiario(final Long agencia, final Long conta) {
 
-        try {
-            Thread.sleep(3000);
-        } catch (InterruptedException message){
-
-        }
-
-        var limiteDiarioProvider = fallback(agencia, conta);
-        return limiteDiarioProvider.get();
+        return buscarLimiteDiarioSupplier(agencia, conta);
     }
 
 
-    private Supplier<LimiteDiarioDto> fallback(final Long agencia, final Long conta) {
+    private Mono<LimiteDiarioDto> buscarLimiteDiarioSupplier(final Long agencia, final Long conta) {
 
         var limiteDiarioSup = countCircuitBreaker.decorateSupplier(() -> httpClient.buscarLimiteDiario(agencia, conta));
 
-        return Decorators
-                .ofSupplier(limiteDiarioSup)
-                .withCircuitBreaker(countCircuitBreaker)
-                .withFallback(Arrays.asList(CallNotPermittedException.class), //This exception is thrown when has the failure.
-                        e -> this.getStaticLimit()).decorate();
+        return Mono.fromSupplier(Decorators.ofSupplier(limiteDiarioSup)
+                    .withCircuitBreaker(countCircuitBreaker)
+                    .withFallback(Arrays.asList(CallNotPermittedException.class), //This exception is thrown when has the failure.
+                            e -> this.getStaticLimit()).decorate());
+
     }
 
     private LimiteDiarioDto getStaticLimit() {

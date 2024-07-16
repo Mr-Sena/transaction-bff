@@ -3,6 +3,7 @@ package br.com.blueproject.transactionbff.domain;
 import br.com.blueproject.transactionbff.dto.RequestTransactionDto;
 import br.com.blueproject.transactionbff.dto.TransactionDto;
 import br.com.blueproject.transactionbff.redis.TransactionRedisRepository;
+import br.com.blueproject.transactionbff.tratamentodesvio.NotFoundException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.dao.QueryTimeoutException;
@@ -12,8 +13,9 @@ import org.springframework.retry.annotation.Retryable;
 import org.springframework.retry.support.RetryTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import reactor.core.publisher.Mono;
+import reactor.core.publisher.SignalType;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
@@ -39,14 +41,34 @@ public class TransactionService {
     @Retryable( value = QueryTimeoutException.class, maxAttempts = 5, backoff = @Backoff(delay = 1000))
     // QueryTimeoutException -> When lost redis database connection.
     @Transactional
-    public Optional<TransactionDto> save (final RequestTransactionDto dadosDeTransferencia) {
-        dadosDeTransferencia.setData(LocalDateTime.now());
+    public Mono<RequestTransactionDto> save (final RequestTransactionDto dadosDeTransferencia) {
 
-        Optional persistence = Optional.of(repository.save(dadosDeTransferencia));
-        kafkaProducerTemplate.send(topicName, dadosDeTransferencia)
-                .doOnSuccess(theResult -> log.info("Sucesso ao publicar a mensagem. {}", theResult.toString())).subscribe();
+        // Mono pipeline sequence [ Failure | Success | Finally ]
+        return Mono.fromCallable(() -> {
 
-        return persistence;
+            dadosDeTransferencia.setData(LocalDateTime.now());
+            dadosDeTransferencia.naoAnalisada();
+
+            return repository.save(dadosDeTransferencia);
+        }).doOnError(throwable -> {
+
+            log.error(throwable.getMessage(), throwable);
+            throw new NotFoundException("Unable to find resource.");
+        })
+
+        .doOnSuccess(transferencia -> {
+
+            log.info("Persistência de dados realizada com sucesso: {}", transferencia);
+            kafkaProducerTemplate.send(topicName, dadosDeTransferencia)
+                    .doOnSuccess(theResult -> log.info(theResult.toString())).subscribe();
+
+        })
+        .doFinally(signalType -> {
+
+            if (signalType.compareTo(SignalType.ON_COMPLETE) == 0) {
+                log.info("Mensagem enviada com sucesso para o Kafka. {}", dadosDeTransferencia);
+            }
+        });
     }
 
 

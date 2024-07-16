@@ -37,15 +37,9 @@ public class TransactionController {
             @ApiResponse(responseCode = "404", description = "Recursos não foi localizado.")
     })
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
-    public Mono<TransactionDto> enviarTransacao(@RequestBody final RequestTransactionDto requestTransactionDto) {
+    public Mono<RequestTransactionDto> enviarTransacao(@RequestBody final RequestTransactionDto requestTransactionDto) {
 
-        final Optional requestDto = service.save(requestTransactionDto);
-        if (requestDto.isPresent()) {
-            return Mono.just( (TransactionDto) requestDto.get());
-
-        }
-
-        throw new NotFoundException("Unable to find resource.");
+        return service.save(requestTransactionDto);
     }
 
 

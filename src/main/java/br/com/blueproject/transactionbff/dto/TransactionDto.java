@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.redis.core.RedisHash;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -25,6 +26,7 @@ import java.util.UUID;
 @Setter
 @EqualsAndHashCode(of = "uuid")
 @RedisHash(value = "TransactionDto", timeToLive = 300) // Persistir os dados somente durante 5 minutos (300 segundos).
+@ToString(of = {"uuid", "situacao"})
 public class TransactionDto {
 
     @Id
@@ -55,4 +57,8 @@ public class TransactionDto {
 
     @Schema(description = "Situação da transação")
     private SituacaoEnum situacao;
+
+    public void naoAnalisada() {
+        this.situacao = SituacaoEnum.NAO_ANALISADA;
+    }
 }
