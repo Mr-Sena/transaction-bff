@@ -1,4 +1,7 @@
 spring:
+  config:
+    import: optional:configserver:http://localhost:8888/ # Origem de referência de propriedades para o sistema distribuído.
+
   application:
     name: transaction-bff
 
@@ -8,7 +11,6 @@ spring:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
       transaction-id-prefix: ${spring.application.name}
-    bootstrap-servers: localhost:9092
     properties:
       spring:
         json:
@@ -16,23 +18,11 @@ spring:
             packages: br.com.blueproject.*
 
 
-  redis:
-    port: 6379
-    host: localhost
-    timeout: 5000 # default value is 60000 [ 60 segundos. ]
-
 app:
   topic: transaction
 
 server:
   port: 8082
-
-limites:
-  url: http://localhost:8086
-
-transaction:
-  url: http://localhost:8080
-
 
 
 

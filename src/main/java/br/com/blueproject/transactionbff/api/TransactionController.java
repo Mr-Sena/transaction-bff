@@ -11,6 +11,7 @@ import io.swagger.v3.oas.annotations.enums.ParameterIn;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.MediaType;
 import org.springframework.http.codec.ServerSentEvent;
 import org.springframework.web.bind.annotation.*;
@@ -25,6 +26,13 @@ import java.util.Optional;
 @RequestMapping("/transaction")
 @Tag(name = "/transaction", description = "Grupo de API's para manipulação de transações financeiras.")
 public class TransactionController {
+
+    //These keys available references from spring cloud config server.
+    @Value("${transacoes.duration}")
+    private Long duration;
+
+    @Value("${transacoes.events}")
+    private String events;
 
     private TransactionService service;
 
@@ -59,10 +67,10 @@ public class TransactionController {
     @GetMapping( value = "/sse/{agencia}/{conta}" )
     public Flux<ServerSentEvent<List<TransactionDto>>> buscarTransferenciasSSE(@PathVariable("agencia") final Long agencia, @PathVariable("conta") final Long conta) {
 
-        return Flux.interval(Duration.ofSeconds(2)).map( // O valor do intervalo determina um novo mapeamento de eventos após esse tempo específicado.
+        return Flux.interval(Duration.ofSeconds(duration)).map( // O valor do intervalo determina um novo mapeamento de eventos após esse tempo específicado.
                 sequence -> ServerSentEvent.<List<TransactionDto>>builder()
                         .id(String.valueOf(sequence))
-                        .event("transacoes")
+                        .event(events)
                         .data(queryResult(agencia, conta))
                         .retry(Duration.ofSeconds(1)) // Em caso de falha, repetir a nova tentativa após 1 segundo.
                         .build());
