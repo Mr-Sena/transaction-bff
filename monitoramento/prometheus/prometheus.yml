@@ -1,0 +1,13 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+scrape_configs:
+  - job_name: 'prometheusJob'
+    scrape_interval: 5s
+    static_configs:
+      - targets: ['192.168.15.6:9090'] #Servidor prometheus [ Host-ip:porta-de-acesso ]
+  - job_name: 'transaction-bff'
+    scrape_interval: 5s
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['192.168.15.6:8082'] #Servidor da minha aplicação [ Host-ip:porta-de-acesso ].
