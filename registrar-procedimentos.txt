@@ -1,0 +1,25 @@
+
+ > Parâmetros para gerar uma chave pública:
+
+ mkdir tls && cd tls
+ keytool --genkey -alias blueproject -keyalg RSA -keypass changeit -storepass changeit -keystore keystore.jks
+
+   * blueproject é o nome para esse registro.
+
+ > Copiar a chave para o contexto.
+
+ cp keystore.jks ../src/main/resource/
+
+
+ > Exportar o certificado físico do token:
+ keytool -export -alias blueproject -storepass changeit -file server.cer -keystore keystore.jks
+
+ > Registrar confiabilidade de certificado
+ keytool -import -v -trustcacerts -alias blueproject -file server.cer -keystore cacerts.jks -keypass changeit -storepass changeit
+
+
+
+
+ > Copiar os registro para o contexto Spring.
+
+ cp server.cer cacerts.jks ../src/main/resources/

@@ -1,4 +1,26 @@
+server:
+  http2:
+    enabled: true
+  port: 8443 # Porta comum para acesso HTTPS.
+  ssl:
+    enabled: true
+    protocol: TLSv1.3
+    key-store-type: PKCS12
+    key-store: classpath:keystore.jks
+    key-store-password: changeit
+    trust-store-password: changeit
+    trust-store: classpath:cacerts.jks
+
 spring:
+#  main:
+#    allow-bean-definition-overriding: true
+
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: https://keycloak.coffeeandit.com.br/auth/realms/master
+
   config:
     import: optional:configserver:http://localhost:8888/ # Origem de referência de propriedades para o sistema distribuído.
 
@@ -43,9 +65,6 @@ management:
       enabled: true
 
 
-
-server:
-  port: 8082
 
 limites:
   url: http://localhost:8086
