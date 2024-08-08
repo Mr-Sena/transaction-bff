@@ -1,7 +1,7 @@
 server:
   http2:
     enabled: true
-  port: 8443 # Porta comum para acesso HTTPS.
+  port: 8443 # Porta estabelecida para acesso HTTPS.
   ssl:
     enabled: true
     protocol: TLSv1.3
@@ -12,9 +12,6 @@ server:
     trust-store: classpath:cacerts.jks
 
 spring:
-#  main:
-#    allow-bean-definition-overriding: true
-
   security:
     oauth2:
       resourceserver:

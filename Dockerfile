@@ -4,4 +4,4 @@ RUN ls /tmp
 ENTRYPOINT ["java", "-jar", "/tmp/app.jar"]
 EXPOSE 8082
 
-# Executar o comando 'gradlew bootJar' antes de criar a imagem.
+# Executar o comando './gradlew bootJar' antes de criar a imagem.
