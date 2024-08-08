@@ -1,0 +1,28 @@
+
+ Propriedade específica para o acesso define a porta 8443,
+ relativo ao protocolo HTTPS. Portanto, o acesso à Api,
+ deve ser feito com a URL do modelo por extenso, exemplo:
+ > curl https://localhost:8443/actuator/health
+
+
+
+  * Flag:
+  -k [ Allow insecure server connections]
+   Para ignorar a assinatura do certificado (auto-assinado), nesse caso.
+ > curl -k -v https://localhost:8443/actuator/health
+
+
+
+ - Gerenciamento de token...
+
+curl https://keycloak.coffeeandit.com.br/auth/realms/master/protocol/openid-connect/certs
+
+curl --location --request POST 'https://keycloak.coffeeandit.com.br/auth/realms/master/protocol/openid-connect/token' \
+--header 'Content-Type: application/x-www-form-urlencoded' \
+--data-urlencode 'password=n_BQ6KgdGb4~MFwj' \
+--data-urlencode 'grant_type=password' \
+--data-urlencode 'client_id=coffeeandit' \
+--data-urlencode 'scope=openid' \
+--data-urlencode 'username=coffeeandit'
+
+
